@@ -1,10 +1,11 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,19 +34,41 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         dr=new DrawFrame();
         //panel=new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
        // menuPanel=new DrawMenu();
-        createMenu();
+        //createMenu();
         dre=new DrawPlayBar();
+
         leftPanel=new DrawLeftPanel();
         rightPanel=new DrawRightPanel();
         dr.add(dre);
         //dr.add(menuPanel);
         dr.add(leftPanel);
         dr.add(rightPanel);
+        //createPlay();
         populateSongList();
 
 
     }
 
+    public void createPlay(){
+        JLabel labelPlay=new JLabel("play button");
+        labelPlay.setBounds(50,30,30,30);
+//        ImageIcon icon=new ImageIcon("play.png");
+//        labelPlay.setIcon(icon.getImageIcon());
+//        BufferedImage img=null;
+//        try{
+//            img= ImageIO.read(new File("play.png"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        Image dimg=img.getScaledInstance(labelPlay.getWidth(),labelPlay.getHeight(),Image.SCALE_SMOOTH);
+        ImageIcon imageIcon = null;
+        ImageIcon img=new ImageIcon("redplay.png");
+        imageIcon=new ImageIcon(img.getImage().getScaledInstance(50,50,Image.SCALE_DEFAULT));
+        labelPlay.setIcon(imageIcon);
+        labelPlay.setText("");
+        dre.add(labelPlay);
+
+    }
     public void createMenu(){
         JMenuBar jMenuBar=new JMenuBar();
         UIManager.put("MenuBar.background",Color.BLACK);
@@ -56,7 +79,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         JMenuItem menuItem1=new JMenuItem("Open",KeyEvent.VK_O);
         fileMenu.add(menuItem1);
         dr.setJMenuBar(jMenuBar);
-        drawMenuTools();
+        //drawMenuTools();
     }
 
     public void populateSongList(){
@@ -65,7 +88,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
             while ((line= reader.readLine())!=null){
                 String[] songs=line.split(",");
                 songList.add(new ArrayList<String >(Arrays.asList(songs[0],songs[1])));
-                System.out.println(songList);
+                //System.out.println(songList);
 //create label and set song names TBC
 
             }
@@ -75,6 +98,11 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
             e.printStackTrace();
         }
 
+
+
+//        songList.add(new ArrayList<String>(Arrays.asList("Adam Levine","Sugar")));
+//        songList.add(new ArrayList<String>(Arrays.asList("Naruto","Opening1")));
+//        songList.add(new ArrayList<String>(Arrays.asList("GNR","Sweet Child O mine")));
         createSongLabels(songList);
 
     }
@@ -83,32 +111,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         labelFile=new JLabel();
         labelFile.setText("File");
         labelFile.setBounds(0,0,40,18);
-        labelFile.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        });
+        labelFile.addMouseListener(new ClickMouse(3));
         //labelFile.setForeground(Color.YELLOW);
 //        menuPanel.add(labelFile);
 //
@@ -121,31 +124,50 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
     }
 
     public void createSongLabels(ArrayList<ArrayList<String>> arr){
-        JButton jButton=new JButton();
-        jButton.setText("Cick");
-        leftPanel.add(jButton);
-        JLabel label;
-       /// int i=0;
-        int boundMulti=1;
+//        JButton jButton=new JButton();
+//        jButton.setText("Cick");
+//        leftPanel.add(jButton);
+//        JLabel label;
+//       /// int i=0;
+//        int boundMulti=1;
 
-        for(ArrayList<String> list:arr){
-
-            System.out.println(list);
-            label=new JLabel(list.get(1));
-            label.setBounds(0,boundMulti*20,200,20);
-            boundMulti++;
-            leftPanel.add(label);
-            //leftPanel.add(label);
-
+//        for(ArrayList<String> list:arr){
+//
+//            System.out.println(list);
+//            label=new JLabel(list.get(1));
+//            label.setBounds(0,boundMulti*20,200,20);
+//
+//            boundMulti++;
+//            leftPanel.add(label);
+//            //leftPanel.add(label);
+//
+//
+//        }
+        DefaultListModel def=new DefaultListModel();
+        for(int i=0;i< arr.size();i++){
+            def.add(i,arr.get(i).get(1));
 
         }
+        JList list=new JList(def);
+        list.setVisibleRowCount(arr.size());
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+
+            }
+        });
+        list.setBounds(10,40,180,arr.size()*19);
+        list.setBackground(Color.BLACK);
+        list.setForeground(Color.white);
+        leftPanel.add(list);
+
     }
 
 
 }
 class DrawPlayBar extends JPanel{
     public DrawPlayBar(){
-        setBounds(0,0,800,20);
+        setBounds(0,0,800,60);
         setBackground(new Color(64, 61, 54));
         //setLayout(null);
 
@@ -158,6 +180,8 @@ class DrawLeftPanel extends JPanel{
         setBackground(new Color(87,99,99));
         setLayout(null);
     }
+
+
 }
 
 class DrawRightPanel extends JPanel{
