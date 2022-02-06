@@ -229,7 +229,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         scrollPane.setViewportView(list);
         list.setLayoutOrientation(JList.VERTICAL);
         leftPanel.add(scrollPane);
-        //leftPanel.add(list);
+        leftPanel.add(list);
 
         jpt=arr;
 
