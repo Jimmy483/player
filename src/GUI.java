@@ -9,6 +9,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class GUI {
@@ -19,6 +20,10 @@ JLabel labelFile;
 JLabel labelSetting;
 DrawPlayBar dre;
 DrawFrame dr;
+DrawMusicBar drM;
+    JList<String> list;
+    DefaultListModel def;
+    ArrayList<ArrayList<String>> jpt;
 final String fileName="C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt";
 String line="";
 ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
@@ -34,24 +39,38 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         dr=new DrawFrame();
         //panel=new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
        // menuPanel=new DrawMenu();
-        //createMenu();
-        dre=new DrawPlayBar();
 
+        dre=new DrawPlayBar();
+        drM=new DrawMusicBar();
         leftPanel=new DrawLeftPanel();
         rightPanel=new DrawRightPanel();
         dr.add(dre);
+        dr.add(drM);
         //dr.add(menuPanel);
         dr.add(leftPanel);
         dr.add(rightPanel);
-        //createPlay();
+        createPlay();
         populateSongList();
+        createMenu();
 
+    }
+
+    public void createMusicBar(){
 
     }
 
     public void createPlay(){
+        ImageIcon imageIcon = null;
+        JLabel labelPrevious=new JLabel("Previous Button");
+        //labelPrevious.setBounds(200,20,30,30);
+        ImageIcon imgPrevious=new ImageIcon("stprevious.png");
+        imageIcon=new ImageIcon(imgPrevious.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+        labelPrevious.setIcon(imageIcon);
+        labelPrevious.setText("");
+        dre.add(labelPrevious);
+
         JLabel labelPlay=new JLabel("play button");
-        labelPlay.setBounds(50,30,30,30);
+        //labelPlay.setBounds(200,20,30,30);
 //        ImageIcon icon=new ImageIcon("play.png");
 //        labelPlay.setIcon(icon.getImageIcon());
 //        BufferedImage img=null;
@@ -61,12 +80,22 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 //            e.printStackTrace();
 //        }
 //        Image dimg=img.getScaledInstance(labelPlay.getWidth(),labelPlay.getHeight(),Image.SCALE_SMOOTH);
-        ImageIcon imageIcon = null;
+
         ImageIcon img=new ImageIcon("redplay.png");
-        imageIcon=new ImageIcon(img.getImage().getScaledInstance(50,50,Image.SCALE_DEFAULT));
+        imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
         labelPlay.setIcon(imageIcon);
         labelPlay.setText("");
         dre.add(labelPlay);
+
+        JLabel labelNext=new JLabel("Next Button");
+        //labelNext.setBounds(200,20,30,30);
+        ImageIcon imgNext=new ImageIcon("realnext.png");
+        imageIcon=new ImageIcon(imgNext.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+        labelNext.setIcon(imageIcon);
+        labelNext.setText("");
+        dre.add(labelNext);
+
+
 
     }
     public void createMenu(){
@@ -78,6 +107,38 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         jMenuBar.add(fileMenu);
         JMenuItem menuItem1=new JMenuItem("Open",KeyEvent.VK_O);
         fileMenu.add(menuItem1);
+        menuItem1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser jfc=new JFileChooser();
+                JFrame jf=new JFrame();
+                int agree=jfc.showOpenDialog(jf.add(jfc));
+                int position=list.getModel().getSize();
+                if(agree==JFileChooser.APPROVE_OPTION){
+                    File file= jfc.getSelectedFile();
+                    String text=file.getPath().toString();
+                    String[] txt;
+                    txt=new String[]{text};
+                    def.add(position,text);
+//                    DefaultListModel df=new DefaultListModel();
+//                    df.add(0,text);
+//                    list.add(());
+//                    list=new JList(df);
+//                    list.setVisibleRowCount(jpt.size());
+//                    list.addListSelectionListener(new ListSelectionListener() {
+//                        @Override
+//                        public void valueChanged(ListSelectionEvent e) {
+//
+//                        }
+//                    });
+//                    list.setBounds(10,20,180,(jpt.size()+1)*19);
+//                    list.setBackground(Color.BLACK);
+//                    list.setForeground(Color.white);
+                    //leftPanel.add(list);
+
+                }
+            }
+        });
         dr.setJMenuBar(jMenuBar);
         //drawMenuTools();
     }
@@ -143,12 +204,17 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 //
 //
 //        }
-        DefaultListModel def=new DefaultListModel();
+        def=new DefaultListModel();
         for(int i=0;i< arr.size();i++){
             def.add(i,arr.get(i).get(1));
 
         }
-        JList list=new JList(def);
+//        List<String> myList=new ArrayList<>(arr.size());
+//        for(int i=0;i<arr.size();i++){
+//            myList.add(arr.get(i).get(1));
+//        }
+//        list=new JList<String>(myList.toArray(new String[myList.size()]));
+        list=new JList(def);
         list.setVisibleRowCount(arr.size());
         list.addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -156,27 +222,41 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 
             }
         });
-        list.setBounds(10,40,180,arr.size()*19);
+        list.setBounds(10,20,180,def.size()*19);
         list.setBackground(Color.BLACK);
         list.setForeground(Color.white);
-        leftPanel.add(list);
+        JScrollPane scrollPane=new JScrollPane();
+        scrollPane.setViewportView(list);
+        list.setLayoutOrientation(JList.VERTICAL);
+        leftPanel.add(scrollPane);
+        //leftPanel.add(list);
+
+        jpt=arr;
 
     }
 
 
 }
+class DrawMusicBar extends JPanel{
+    public DrawMusicBar(){
+        setBounds(0,0,800,40);
+        setBackground(new Color(64,61,54));
+    }
+}
 class DrawPlayBar extends JPanel{
     public DrawPlayBar(){
-        setBounds(0,0,800,60);
+        setBounds(0,40,800,60);
         setBackground(new Color(64, 61, 54));
-        //setLayout(null);
+
+       // setLayout(null);
 
     }
 }
 
 class DrawLeftPanel extends JPanel{
     public DrawLeftPanel(){
-        setBounds(0,21,200,500);
+        //new BorderLayout();
+        setBounds(0,101,200,500);
         setBackground(new Color(87,99,99));
         setLayout(null);
     }
@@ -187,7 +267,7 @@ class DrawLeftPanel extends JPanel{
 class DrawRightPanel extends JPanel{
     public DrawRightPanel(){
         setBackground(new Color(56,148,148));
-        setBounds(60,21,600,500);
+        setBounds(60,101,600,500);
     }
 }
 class DrawFrame extends JFrame{
