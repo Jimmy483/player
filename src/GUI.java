@@ -22,6 +22,7 @@ DrawPlayBar dre;
 DrawFrame dr;
 DrawMusicBar drM;
     JList<String> list;
+    List<String> myList;
     DefaultListModel def;
     ArrayList<ArrayList<String>> jpt;
 final String fileName="C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt";
@@ -52,11 +53,13 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         createPlay();
         populateSongList();
         createMenu();
-
+        createMusicBar();
     }
 
     public void createMusicBar(){
-
+        JProgressBar progressBar=new JProgressBar();
+        progressBar.setBounds(300,10,100,50);
+        drM.add(progressBar);
     }
 
     public void createPlay(){
@@ -81,7 +84,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 //        }
 //        Image dimg=img.getScaledInstance(labelPlay.getWidth(),labelPlay.getHeight(),Image.SCALE_SMOOTH);
 
-        ImageIcon img=new ImageIcon("redplay.png");
+        ImageIcon img=new ImageIcon("realplay.png");
         imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
         labelPlay.setIcon(imageIcon);
         labelPlay.setText("");
@@ -113,12 +116,13 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                 JFileChooser jfc=new JFileChooser();
                 JFrame jf=new JFrame();
                 int agree=jfc.showOpenDialog(jf.add(jfc));
-                int position=list.getModel().getSize();
+                int position=myList.size();
                 if(agree==JFileChooser.APPROVE_OPTION){
                     File file= jfc.getSelectedFile();
                     String text=file.getPath().toString();
                     String[] txt;
                     txt=new String[]{text};
+                    myList.add(text);
                     def.add(position,text);
 //                    DefaultListModel df=new DefaultListModel();
 //                    df.add(0,text);
@@ -213,23 +217,40 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 //        for(int i=0;i<arr.size();i++){
 //            myList.add(arr.get(i).get(1));
 //        }
-//        list=new JList<String>(myList.toArray(new String[myList.size()]));
-        list=new JList(def);
-        list.setVisibleRowCount(arr.size());
-        list.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
+        myList = new ArrayList<String>(10);
+        for(int index = 0; index < arr.size();index++) {
+            myList.add(arr.get(index).get(1));
+        }
+        //list=new JList<String>(myList.toArray(new String[myList.size()]));
+//        list=new JList(def);
+//        list.setVisibleRowCount(arr.size());
+//        list.addListSelectionListener(new ListSelectionListener() {
+//            @Override
+//            public void valueChanged(ListSelectionEvent e) {
+//
+//            }
+//        });
+//        list.setBounds(10,20,180,def.size()*19);
+//        list.setBackground(Color.BLACK);
+//        list.setForeground(Color.white);
+        //final JList<String> list = new JList<String>(myList.toArray(new String[myList.size()]));
+        final JList<String> list = new JList(def);
+        JScrollPane scrollPane = new JScrollPane();
+        //scrollPane.setPreferredSize(new Dimension(50,100));
 
-            }
-        });
-        list.setBounds(10,20,180,def.size()*19);
-        list.setBackground(Color.BLACK);
-        list.setForeground(Color.white);
-        JScrollPane scrollPane=new JScrollPane();
+        //scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(new Color(0,0,0));
+        //scrollPane.getVerticalScrollBar().setBackground(Color.BLACK);
+        scrollPane.getViewport().setForeground(new Color(255,255,255));
+
+//        scrollPane.setBackground(new Color(0,0,0));
+//        scrollPane.setForeground(new Color(255,255,255));
         scrollPane.setViewportView(list);
+        scrollPane.setBounds(0,0,200,320);
         list.setLayoutOrientation(JList.VERTICAL);
         leftPanel.add(scrollPane);
-        leftPanel.add(list);
+        //rightPanel.setBounds(20,40,180,500);
+        //leftPanel.add(list);
 
         jpt=arr;
 
@@ -256,7 +277,7 @@ class DrawPlayBar extends JPanel{
 class DrawLeftPanel extends JPanel{
     public DrawLeftPanel(){
         //new BorderLayout();
-        setBounds(0,101,200,500);
+        setBounds(0,100,200,400);
         setBackground(new Color(87,99,99));
         setLayout(null);
     }
@@ -266,8 +287,9 @@ class DrawLeftPanel extends JPanel{
 
 class DrawRightPanel extends JPanel{
     public DrawRightPanel(){
-        setBackground(new Color(56,148,148));
-        setBounds(60,101,600,500);
+        setLayout(null);
+        setBackground(new Color(150, 134, 150));
+        setBounds(200,100,600,400);
     }
 }
 class DrawFrame extends JFrame{
@@ -276,7 +298,8 @@ class DrawFrame extends JFrame{
         setVisible(true);
         setTitle("Gmi's Music Player");
         setSize(800,500);
-        //setLayout(null);
+        setLocationRelativeTo(null);
+        setLayout(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 
