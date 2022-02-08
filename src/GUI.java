@@ -1,7 +1,14 @@
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
+
 import javax.imageio.ImageIO;
+import javax.print.attribute.standard.Media;
+import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -10,9 +17,13 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.net.MalformedURLException;
+import java.net.URL;
+//import javazoom.jlgui.basicplayer.BasicPlayer;
+//import javazoom.jlgui.basicplayer.BasicPlayerException;
 
 
-public class GUI {
+public class GUI implements MouseListener {
 JPanel leftPanel;
 JPanel rightPanel;
 
@@ -21,12 +32,28 @@ JLabel labelSetting;
 DrawPlayBar dre;
 DrawFrame dr;
 DrawMusicBar drM;
-    JList<String> list;
-    List<String> myList;
-    DefaultListModel def;
-    ArrayList<ArrayList<String>> jpt;
+//JList<String> list;
+List<String> myList;
+DefaultListModel def;
+JList<String> list;
+ArrayList<ArrayList<String>> jpt;
+JLabel labelPlay;
+ImageIcon img;
+Thread playThread;
+Thread pauseThread;
+Thread resumeThread;
+Player player;
+FileInputStream fileInputStream;
+long pause;
+long totalLength;
+File myFile;
+String musicFilename;
+String musicFilePath;
+JFileChooser jfc;
+BufferedInputStream bufferedInputStream;
 final String fileName="C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt";
 String line="";
+JLabel labelMusic;
 ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
     public static void main(String[] args) {
         new GUI();
@@ -54,25 +81,34 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         populateSongList();
         createMenu();
         createMusicBar();
+        playThread=new Thread(playRunnable);
+        pauseThread=new Thread(pauseRunnable);
+        resumeThread=new Thread(resumeRunnable);
     }
 
     public void createMusicBar(){
         JProgressBar progressBar=new JProgressBar();
-        progressBar.setBounds(300,10,100,50);
+        progressBar.setBounds(300,20,200,10);
+        progressBar.setForeground(Color.blue);
         drM.add(progressBar);
+        labelMusic=new JLabel("File");
+        labelMusic.setForeground(Color.white);
+        //labelMusic.scrollRectToVisible(labelMusic.getBounds());
+        labelMusic.setBounds(370,2,400,20);
+        drM.add(labelMusic);
     }
 
     public void createPlay(){
         ImageIcon imageIcon = null;
         JLabel labelPrevious=new JLabel("Previous Button");
         //labelPrevious.setBounds(200,20,30,30);
-        ImageIcon imgPrevious=new ImageIcon("stprevious.png");
+        ImageIcon imgPrevious=new ImageIcon("realprevious.png");
         imageIcon=new ImageIcon(imgPrevious.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
         labelPrevious.setIcon(imageIcon);
         labelPrevious.setText("");
         dre.add(labelPrevious);
 
-        JLabel labelPlay=new JLabel("play button");
+        labelPlay=new JLabel("play button");
         //labelPlay.setBounds(200,20,30,30);
 //        ImageIcon icon=new ImageIcon("play.png");
 //        labelPlay.setIcon(icon.getImageIcon());
@@ -84,10 +120,11 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 //        }
 //        Image dimg=img.getScaledInstance(labelPlay.getWidth(),labelPlay.getHeight(),Image.SCALE_SMOOTH);
 
-        ImageIcon img=new ImageIcon("realplay.png");
+        img=new ImageIcon("realplay.png");
         imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
         labelPlay.setIcon(imageIcon);
         labelPlay.setText("");
+        labelPlay.addMouseListener(this);
         dre.add(labelPlay);
 
         JLabel labelNext=new JLabel("Next Button");
@@ -113,13 +150,19 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         menuItem1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser jfc=new JFileChooser();
+                jfc=new JFileChooser();
                 JFrame jf=new JFrame();
                 int agree=jfc.showOpenDialog(jf.add(jfc));
                 int position=myList.size();
+                jfc.setFileFilter(new FileNameExtensionFilter("Mp3 files","mp3"));
+                jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 if(agree==JFileChooser.APPROVE_OPTION){
+                    pause=0;
                     File file= jfc.getSelectedFile();
                     String text=file.getPath().toString();
+                    myFile=jfc.getSelectedFile();
+                    musicFilename=jfc.getSelectedFile().getName();
+                    musicFilePath=jfc.getSelectedFile().getPath();
                     String[] txt;
                     txt=new String[]{text};
                     myList.add(text);
@@ -189,52 +232,17 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
     }
 
     public void createSongLabels(ArrayList<ArrayList<String>> arr){
-//        JButton jButton=new JButton();
-//        jButton.setText("Cick");
-//        leftPanel.add(jButton);
-//        JLabel label;
-//       /// int i=0;
-//        int boundMulti=1;
-
-//        for(ArrayList<String> list:arr){
-//
-//            System.out.println(list);
-//            label=new JLabel(list.get(1));
-//            label.setBounds(0,boundMulti*20,200,20);
-//
-//            boundMulti++;
-//            leftPanel.add(label);
-//            //leftPanel.add(label);
-//
-//
-//        }
         def=new DefaultListModel();
         for(int i=0;i< arr.size();i++){
             def.add(i,arr.get(i).get(1));
 
         }
-//        List<String> myList=new ArrayList<>(arr.size());
-//        for(int i=0;i<arr.size();i++){
-//            myList.add(arr.get(i).get(1));
-//        }
         myList = new ArrayList<String>(10);
         for(int index = 0; index < arr.size();index++) {
             myList.add(arr.get(index).get(1));
         }
-        //list=new JList<String>(myList.toArray(new String[myList.size()]));
-//        list=new JList(def);
-//        list.setVisibleRowCount(arr.size());
-//        list.addListSelectionListener(new ListSelectionListener() {
-//            @Override
-//            public void valueChanged(ListSelectionEvent e) {
-//
-//            }
-//        });
-//        list.setBounds(10,20,180,def.size()*19);
-//        list.setBackground(Color.BLACK);
-//        list.setForeground(Color.white);
-        //final JList<String> list = new JList<String>(myList.toArray(new String[myList.size()]));
-        final JList<String> list = new JList(def);
+
+        list = new JList(def);
         JScrollPane scrollPane = new JScrollPane();
         //scrollPane.setPreferredSize(new Dimension(50,100));
 
@@ -257,11 +265,142 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
     }
 
 
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if(e.getSource()==labelPlay){
+            if(img.getDescription()=="realplay.png"){
+                if(pause>0){
+                    resumeThread.start();
+                }
+                else{
+                    playThread.start();
+                }
+
+            }
+            else if(img.getDescription()=="realpause.png"){
+//             if(pauseThread.isAlive())
+//             {
+//                 //new Thread(pauseRunnable).start();
+//                 pauseThread=new Thread(pauseRunnable);
+//                 pauseThread.start();
+             //}
+             pauseThread.start();
+            }
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    Runnable playRunnable=new Runnable() {
+        @Override
+        public void run() {
+            String clicked=list.getSelectedValue().toString();
+
+            if(img.getDescription().toString()=="realplay.png"){
+                img=new ImageIcon("realpause.png");
+                ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+                labelPlay.setIcon(imageIcon);
+            }
+            else if(img.getDescription().toString()=="realpause.png"){
+                img=new ImageIcon("realplay.png");
+                ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+                labelPlay.setIcon(imageIcon);
+            }
+
+            try {
+                labelMusic.setText(clicked);
+                fileInputStream=new FileInputStream(clicked);
+                bufferedInputStream=new BufferedInputStream(fileInputStream);
+                player=new Player(bufferedInputStream);
+                totalLength=fileInputStream.available();
+                player.play();//starting music
+
+
+
+            }catch (IOException | JavaLayerException ad){
+                ad.printStackTrace();
+            }
+        }
+    };
+
+    Runnable pauseRunnable=new Runnable() {
+        @Override
+        public void run() {
+
+            if(img.getDescription().toString()=="realplay.png"){
+                img=new ImageIcon("realpause.png");
+                ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+                labelPlay.setIcon(imageIcon);
+            }
+            else if(img.getDescription().toString()=="realpause.png"){
+                img=new ImageIcon("realplay.png");
+                ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+                labelPlay.setIcon(imageIcon);
+            }
+            try {
+                pause=fileInputStream.available();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            player.close();
+        }
+    };
+
+    Runnable resumeRunnable=new Runnable() {
+        @Override
+        public void run() {
+            if(img.getDescription().toString()=="realplay.png"){
+                img=new ImageIcon("realpause.png");
+                ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+                labelPlay.setIcon(imageIcon);
+            }
+            else if(img.getDescription().toString()=="realpause.png"){
+                img=new ImageIcon("realplay.png");
+                ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+                labelPlay.setIcon(imageIcon);
+            }
+
+            try {
+                fileInputStream=new FileInputStream(myFile);
+                bufferedInputStream=new BufferedInputStream(fileInputStream);
+                player=new Player(bufferedInputStream);
+                fileInputStream.skip(totalLength-pause);
+                player.play();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JavaLayerException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 }
 class DrawMusicBar extends JPanel{
     public DrawMusicBar(){
         setBounds(0,0,800,40);
-        setBackground(new Color(64,61,54));
+        setBackground(new Color(64, 61, 54));
+        setLayout(null);
     }
 }
 class DrawPlayBar extends JPanel{
