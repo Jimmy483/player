@@ -42,14 +42,18 @@ ImageIcon img;
 Thread playThread;
 Thread pauseThread;
 Thread resumeThread;
+Thread progressThread;
 Player player;
 FileInputStream fileInputStream;
+long fileLength;
 long pause;
 long totalLength;
 File myFile;
 String musicFilename;
 String musicFilePath;
+    String clickedd;
 JFileChooser jfc;
+    JProgressBar progressBar;
 BufferedInputStream bufferedInputStream;
 final String fileName="C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt";
 String line="";
@@ -81,15 +85,33 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         populateSongList();
         createMenu();
         createMusicBar();
+        progressThread=new Thread(progressRunnable);
         playThread=new Thread(playRunnable);
+        //checkThreadStatus(playThread);
         pauseThread=new Thread(pauseRunnable);
         resumeThread=new Thread(resumeRunnable);
+        progressThread=new Thread(progressRunnable);
+    }
+
+    public void checkThreadStatus(Thread playThread){
+
+        img=new ImageIcon("realplay.png");
+        ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+        labelPlay.setIcon(imageIcon);
+        player.close();
+        playThread.interrupt();
+//        labelMusic.setText("File");
+
     }
 
     public void createMusicBar(){
-        JProgressBar progressBar=new JProgressBar();
+        progressBar=new JProgressBar();
         progressBar.setBounds(300,20,200,10);
         progressBar.setForeground(Color.blue);
+        progressBar.setVisible(true);
+        progressBar.setStringPainted(true);
+//        progressBar.setValue(12);
+
         drM.add(progressBar);
         labelMusic=new JLabel("File");
         labelMusic.setForeground(Color.white);
@@ -163,6 +185,23 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                     myFile=jfc.getSelectedFile();
                     musicFilename=jfc.getSelectedFile().getName();
                     musicFilePath=jfc.getSelectedFile().getPath();
+                    try {
+                        BufferedWriter bfW=new BufferedWriter(new FileWriter("C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt"));
+//                        BufferedReader bfR=new BufferedReader(new FileReader("C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt"));
+//                        String line;
+//                        while ((line=bfR.readLine())!=null){
+//                            String[] songs=line.split(",");
+//
+//                        }
+                        for(int i=0;i<songList.size();i++){
+                            bfW.write(songList.get(i).get(0)+"," + songList.get(i).get(1) + "\n");
+
+                        }
+                        bfW.write(musicFilename+", " +musicFilePath);
+                        bfW.close();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                     String[] txt;
                     txt=new String[]{text};
                     myList.add(text);
@@ -311,10 +350,36 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 
     }
 
+    Runnable progressRunnable=new Runnable() {
+        @Override
+        public void run() {
+
+            fileLength=clickedd.length();
+            double prog=0.52;
+            int n=1;
+            while (!player.isComplete()){
+                prog=prog+0.52;
+                if(n%2==0){
+                    progressBar.setValue((int)prog);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                n++;
+            }
+
+        }
+    };
+
     Runnable playRunnable=new Runnable() {
         @Override
         public void run() {
-            String clicked=list.getSelectedValue().toString();
+            clickedd=list.getSelectedValue().toString();
+            //fileLength=clickedd.length();
+            //progressBar.setValue();
+            System.out.println(clickedd);
 
             if(img.getDescription().toString()=="realplay.png"){
                 img=new ImageIcon("realpause.png");
@@ -325,15 +390,20 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                 img=new ImageIcon("realplay.png");
                 ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
                 labelPlay.setIcon(imageIcon);
+                return;
             }
 
+            ////here play code
             try {
-                labelMusic.setText(clicked);
-                fileInputStream=new FileInputStream(clicked);
+                labelMusic.setText(clickedd);
+                fileInputStream=new FileInputStream(clickedd);
                 bufferedInputStream=new BufferedInputStream(fileInputStream);
                 player=new Player(bufferedInputStream);
                 totalLength=fileInputStream.available();
                 player.play();//starting music
+                if(player.isComplete()){
+                    checkThreadStatus(Thread.currentThread());
+                }
 
 
 
