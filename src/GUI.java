@@ -90,7 +90,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         //checkThreadStatus(playThread);
         pauseThread=new Thread(pauseRunnable);
         resumeThread=new Thread(resumeRunnable);
-        progressThread=new Thread(progressRunnable);
+        //progressThread=new Thread(progressRunnable);
     }
 
     public void checkThreadStatus(Thread playThread){
@@ -109,7 +109,8 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         progressBar.setBounds(300,20,200,10);
         progressBar.setForeground(Color.blue);
         progressBar.setVisible(true);
-        progressBar.setStringPainted(true);
+        //progressBar.setStringPainted(true);
+        progressBar.setIndeterminate(true);
 //        progressBar.setValue(12);
 
         drM.add(progressBar);
@@ -197,7 +198,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                             bfW.write(songList.get(i).get(0)+"," + songList.get(i).get(1) + "\n");
 
                         }
-                        bfW.write(musicFilename+", " +musicFilePath);
+                        bfW.write(musicFilename+"," +musicFilePath);
                         bfW.close();
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
@@ -315,6 +316,9 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                 }
                 else{
                     playThread.start();
+//                    while (!player.isComplete()){
+//                        progressBar.setValue(player.getPosition());
+//                    }
                 }
 
             }
@@ -376,7 +380,13 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
     Runnable playRunnable=new Runnable() {
         @Override
         public void run() {
-            clickedd=list.getSelectedValue().toString();
+            pause=0;
+            if(list.getSelectedValue()==null){
+                clickedd=songList.get(0).get(1);
+            }else {
+                clickedd=list.getSelectedValue().toString();
+            }
+            //myFile=clickedd
             //fileLength=clickedd.length();
             //progressBar.setValue();
             System.out.println(clickedd);
@@ -400,14 +410,19 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                 bufferedInputStream=new BufferedInputStream(fileInputStream);
                 player=new Player(bufferedInputStream);
                 totalLength=fileInputStream.available();
+
                 player.play();//starting music
                 if(player.isComplete()){
                     checkThreadStatus(Thread.currentThread());
+//                    img=new ImageIcon("realplay.png");
+//                    ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+//                    labelPlay.setIcon(imageIcon);
                 }
 
 
 
             }catch (IOException | JavaLayerException ad){
+                reset();
                 ad.printStackTrace();
             }
         }
@@ -430,6 +445,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
             try {
                 pause=fileInputStream.available();
             } catch (IOException e) {
+                reset();
                 e.printStackTrace();
             }
             player.close();
@@ -439,6 +455,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
     Runnable resumeRunnable=new Runnable() {
         @Override
         public void run() {
+            //pause=0;
             if(img.getDescription().toString()=="realplay.png"){
                 img=new ImageIcon("realpause.png");
                 ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
@@ -451,20 +468,47 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
             }
 
             try {
+                //fix this
+                if(myFile==null){
+                    reset();
+                    return;
+
+                }
                 fileInputStream=new FileInputStream(myFile);
+                System.out.println(myFile);
+//                fileInputStream=new FileInputStream(clickedd);
                 bufferedInputStream=new BufferedInputStream(fileInputStream);
                 player=new Player(bufferedInputStream);
                 fileInputStream.skip(totalLength-pause);
+                pause=0;
                 player.play();
             } catch (FileNotFoundException e) {
+                reset();
+                //System.out.println("THis is it");
                 e.printStackTrace();
             } catch (JavaLayerException e) {
+                reset();
                 e.printStackTrace();
             } catch (IOException e) {
+                reset();
                 e.printStackTrace();
             }
         }
     };
+
+    public void reset(){
+        clickedd="";
+        pause=0;
+        img=new ImageIcon("realplay.png");
+        ImageIcon imageIcon=new ImageIcon(img.getImage().getScaledInstance(40,40,Image.SCALE_DEFAULT));
+        labelPlay.setIcon(imageIcon);
+        jfc=null;
+        myFile=null;
+        musicFilename="";
+        musicFilePath="";
+
+
+    }
 }
 class DrawMusicBar extends JPanel{
     public DrawMusicBar(){
