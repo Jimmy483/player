@@ -59,6 +59,7 @@ final String fileName="C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt";
 String line="";
 JLabel labelMusic;
 ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
+
     public static void main(String[] args) {
         new GUI();
 
@@ -168,7 +169,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         fileMenu.setForeground(Color.white);
         fileMenu.setMnemonic(KeyEvent.VK_F);
         jMenuBar.add(fileMenu);
-        JMenuItem menuItem1=new JMenuItem("Open",KeyEvent.VK_O);
+        JMenuItem menuItem1=new JMenuItem("Add File to Library",KeyEvent.VK_A);
         fileMenu.add(menuItem1);
         menuItem1.addActionListener(new ActionListener() {
             @Override
@@ -183,7 +184,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                     pause=0;
                     File file= jfc.getSelectedFile();
                     String text=file.getPath().toString();
-                    myFile=jfc.getSelectedFile();
+                   // myFile=jfc.getSelectedFile();
                     musicFilename=jfc.getSelectedFile().getName();
                     musicFilePath=jfc.getSelectedFile().getPath();
                     try {
@@ -315,6 +316,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                     resumeThread.start();
                 }
                 else{
+                    //playThread.stop();
                     playThread.start();
 //                    while (!player.isComplete()){
 //                        progressBar.setValue(player.getPosition());
