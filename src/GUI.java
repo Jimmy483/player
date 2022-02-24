@@ -9,6 +9,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -55,7 +56,7 @@ String musicFilePath;
 JFileChooser jfc;
     JProgressBar progressBar;
 BufferedInputStream bufferedInputStream;
-final String fileName="C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt";
+final String fileName= FileSystemView.getFileSystemView().getHomeDirectory()+"\\songs.txt";
 String line="";
 JLabel labelMusic;
 ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
@@ -86,11 +87,14 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         populateSongList();
         createMenu();
         createMusicBar();
+        dr.revalidate();
+        dr.repaint();
         progressThread=new Thread(progressRunnable);
         playThread=new Thread(playRunnable);
         //checkThreadStatus(playThread);
         pauseThread=new Thread(pauseRunnable);
         resumeThread=new Thread(resumeRunnable);
+
         //progressThread=new Thread(progressRunnable);
     }
 
@@ -161,6 +165,8 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
 
 
 
+
+
     }
     public void createMenu(){
         JMenuBar jMenuBar=new JMenuBar();
@@ -188,7 +194,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                     musicFilename=jfc.getSelectedFile().getName();
                     musicFilePath=jfc.getSelectedFile().getPath();
                     try {
-                        BufferedWriter bfW=new BufferedWriter(new FileWriter("C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt"));
+                        BufferedWriter bfW=new BufferedWriter(new FileWriter(FileSystemView.getFileSystemView().getHomeDirectory()+"\\songs.txt"));
 //                        BufferedReader bfR=new BufferedReader(new FileReader("C:\\Users\\Gmi Bro\\OneDrive\\Desktop\\songs.txt"));
 //                        String line;
 //                        while ((line=bfR.readLine())!=null){
