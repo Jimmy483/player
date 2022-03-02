@@ -1,4 +1,6 @@
 import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.AudioDevice;
+import javazoom.jl.player.JavaSoundAudioDevice;
 import javazoom.jl.player.Player;
 
 import javax.imageio.ImageIO;
@@ -10,6 +12,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.html.HTML;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -39,6 +42,7 @@ DefaultListModel def;
 JList<String> list;
 ArrayList<ArrayList<String>> jpt;
 JLabel labelPlay;
+JLabel labelArtWork;
 ImageIcon img;
 Thread playThread;
 Thread pauseThread;
@@ -60,7 +64,7 @@ final String fileName= FileSystemView.getFileSystemView().getHomeDirectory()+"\\
 String line="";
 JLabel labelMusic;
 ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
-
+   // ImageIcon imageArtwork;
     public static void main(String[] args) {
         new GUI();
 
@@ -73,7 +77,6 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         dr=new DrawFrame();
         //panel=new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
        // menuPanel=new DrawMenu();
-
         dre=new DrawPlayBar();
         drM=new DrawMusicBar();
         leftPanel=new DrawLeftPanel();
@@ -83,10 +86,12 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         //dr.add(menuPanel);
         dr.add(leftPanel);
         dr.add(rightPanel);
+        createDefaultArtwork();
         createPlay();
         populateSongList();
         createMenu();
         createMusicBar();
+
         dr.revalidate();
         dr.repaint();
         progressThread=new Thread(progressRunnable);
@@ -96,6 +101,39 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
         resumeThread=new Thread(resumeRunnable);
 
         //progressThread=new Thread(progressRunnable);
+    }
+
+    public void createDefaultArtwork(){
+        labelArtWork=new JLabel("Song Name");
+        labelArtWork.setBounds(220,20,200,100);
+        ImageIcon imageArtwork=null;
+        ImageIcon img=new ImageIcon("music.jpg");
+        imageArtwork=new ImageIcon(img.getImage().getScaledInstance(150,140,Image.SCALE_DEFAULT));
+        //labelPlay.setIcon(img);
+        labelArtWork.setIcon(imageArtwork);
+        labelArtWork.setText("");
+        rightPanel.add(labelArtWork);
+
+        TextArea jt=new TextArea();
+        jt.setBounds(100,140,400,150);
+        jt.setEditable(false);
+        jt.setText("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss ddddddddd");
+        rightPanel.add(jt);
+
+    }
+
+    public void createSongInfo() {
+        
+//        Label infoLabel=new Label();
+////        ImageIcon img=null;
+////        ImageIcon mainImg=new ImageIcon(clickedd);
+//        try {
+//            AudioFile
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
     }
 
     public void checkThreadStatus(Thread playThread){
@@ -191,6 +229,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                     File file= jfc.getSelectedFile();
                     String text=file.getPath().toString();
                    // myFile=jfc.getSelectedFile();
+                    //jfc.getSelectedFile().
                     musicFilename=jfc.getSelectedFile().getName();
                     musicFilePath=jfc.getSelectedFile().getPath();
                     try {
@@ -433,6 +472,10 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                 reset();
                 ad.printStackTrace();
             }
+
+            createSongInfo();
+
+
         }
     };
 
@@ -484,6 +527,7 @@ ArrayList<ArrayList<String>> songList=new ArrayList<ArrayList<String>>();
                 }
                 fileInputStream=new FileInputStream(myFile);
                 System.out.println(myFile);
+                //fileInputStream.getChannel();
 //                fileInputStream=new FileInputStream(clickedd);
                 bufferedInputStream=new BufferedInputStream(fileInputStream);
                 player=new Player(bufferedInputStream);
